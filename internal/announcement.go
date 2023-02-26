@@ -58,7 +58,11 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcments))
+	err = h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcments))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func toDBAnnouncements(announcments map[string][]*Announcement) []*AnnouncementDB {

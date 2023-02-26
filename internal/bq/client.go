@@ -70,7 +70,7 @@ func (c *ClientWrapper) Insert(tableId string, src interface{}) error {
 		}
 		err := c.bqClient.Dataset(c.dataset).Table(tableId).Inserter().Put(context.Background(), items[start:end])
 		if err != nil {
-			log.Errorf("failed to persist '%s.%s' with '%v'", c.dataset, tableId, err)
+			log.Errorf("failed to persist '%s.%s' with %q", c.dataset, tableId, err)
 			return err
 		}
 		log.Debugf("inserted '%d:%d' into '%s.%s'", start, end, c.dataset, tableId)
