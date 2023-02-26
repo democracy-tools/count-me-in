@@ -58,7 +58,9 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcments))
+	items := toDBAnnouncements(announcments)
+	log.Debug(len(items))
+	err = h.bqClient.Insert(bq.TableAnnouncement, items)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
