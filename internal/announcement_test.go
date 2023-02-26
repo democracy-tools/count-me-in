@@ -29,5 +29,5 @@ func TestAnnouncement(t *testing.T) {
 
 	internal.NewHandle(bq.NewInMemoryClient()).Announcements(w, r)
 
-	require.Equal(t, http.StatusOK, w.Result().StatusCode)
+	require.Equal(t, http.StatusCreated, w.Result().StatusCode)
 }
