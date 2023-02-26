@@ -12,8 +12,8 @@ COPY go.* ./
 RUN go mod download
 # Copy local code to the container image.
 COPY . ./
-# Build the binary.
 RUN go build -v -o server
+
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
@@ -23,5 +23,5 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     rm -rf /var/lib/apt/lists/*
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server /app/server
-# Run the web service on container startup.
+COPY internal/env/.env internal/env/.env 
 CMD ["/app/server"]

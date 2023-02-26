@@ -11,18 +11,23 @@ import (
 	"strings"
 	"time"
 
+	"github.com/democracy-tools/countmein/internal"
+	"github.com/democracy-tools/countmein/internal/bq"
+	"github.com/democracy-tools/countmein/internal/env"
 	"github.com/gorilla/mux"
 	"github.com/onrik/logrus/filename"
 	log "github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/writer"
-	"github.com/tufin/count-me-in/internal"
 )
 
 func main() {
+
+	env.Load()
+	handle := internal.NewHandle(bq.NewClientWrapper(env.GetProjectId()))
 	serve(
 		[]string{"/announcements"},
 		[]string{http.MethodPost},
-		[]func(http.ResponseWriter, *http.Request){internal.Announcements},
+		[]func(http.ResponseWriter, *http.Request){handle.Announcements},
 	)
 }
 
