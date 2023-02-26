@@ -19,7 +19,7 @@ func TestAnnouncement(t *testing.T) {
 		UserId:     "dw12f",
 		UserDevice: internal.Device{Id: "d123", Type: "tag"},
 		SeenDevice: internal.Device{Id: "d234", Type: "iphone 14"},
-		Location:   internal.Location{Latitute: "32.05766501361105", Longitude: "34.76640727232065"},
+		Location:   internal.Location{Latitute: 32.05766501361105, Longitude: 34.76640727232065},
 		Timestamp:  time.Now().Unix(),
 	}}})
 	require.NoError(t, err)

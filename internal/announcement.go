@@ -11,16 +11,16 @@ import (
 )
 
 type AnnouncementDB struct {
-	Id                string `bigquery:"id"`
-	UserId            string `bigquery:"user_id"`
-	UserDeviceId      string `bigquery:"user_device_id"`
-	UserDeviceType    string `bigquery:"user_device_type"`
-	SeenDeviceId      string `bigquery:"seen_device_id"`
-	SeenDeviceType    string `bigquery:"seen_device_type"`
-	LocationLatitute  string `bigquery:"location_latitute"`
-	LocationLongitude string `bigquery:"location_longitude"`
-	UserTimestamp     int64  `bigquery:"user_timestamp"`
-	ServerTimestamp   int64  `bigquery:"server_timestamp"`
+	Id                string  `bigquery:"id"`
+	UserId            string  `bigquery:"user_id"`
+	UserDeviceId      string  `bigquery:"user_device_id"`
+	UserDeviceType    string  `bigquery:"user_device_type"`
+	SeenDeviceId      string  `bigquery:"seen_device_id"`
+	SeenDeviceType    string  `bigquery:"seen_device_type"`
+	LocationLatitute  float64 `bigquery:"location_latitute"`
+	LocationLongitude float64 `bigquery:"location_longitude"`
+	UserTimestamp     int64   `bigquery:"user_timestamp"`
+	ServerTimestamp   int64   `bigquery:"server_timestamp"`
 }
 
 type Announcement struct {
@@ -32,8 +32,8 @@ type Announcement struct {
 }
 
 type Location struct {
-	Latitute  string `json:"latitute"`
-	Longitude string `json:"longitude"`
+	Latitute  float64 `json:"latitute"`
+	Longitude float64 `json:"longitude"`
 }
 
 type Device struct {
@@ -59,7 +59,7 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items := toDBAnnouncements(announcments)
-	log.Debug(len(items))
+	log.Infof("number of items %q", len(items))
 	err = h.bqClient.Insert(bq.TableAnnouncement, items)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
