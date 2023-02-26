@@ -37,8 +37,8 @@ type Location struct {
 }
 
 type Device struct {
-	Id   string
-	Type string
+	Id   string `json:"id"`
+	Type string `json:"type"`
 }
 
 type Handle struct{ bqClient bq.Client }
