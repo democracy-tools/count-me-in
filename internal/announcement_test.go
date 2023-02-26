@@ -15,15 +15,16 @@ import (
 
 func TestAnnouncement(t *testing.T) {
 
-	body, err := json.Marshal(&map[string][]internal.Announcement{"announcments": {{
-		UserId:     "dw12f",
-		UserDevice: internal.Device{Id: "d123", Type: "tag"},
-		SeenDevice: internal.Device{Id: "d234", Type: "iphone 14"},
-		Location:   internal.Location{Latitute: 32.05766501361105, Longitude: 34.76640727232065},
-		Timestamp:  time.Now().Unix(),
-	}}})
-	require.NoError(t, err)
-	r, err := http.NewRequest(http.MethodGet, "/announcements", bytes.NewReader(body))
+	var buf bytes.Buffer
+	require.NoError(t, json.NewEncoder(&buf).Encode(map[string][]*internal.Announcement{
+		"announcement": {{
+			UserId:     "test",
+			UserDevice: internal.Device{Id: "test-1", Type: "iphone 14"},
+			SeenDevice: internal.Device{Id: "test-2", Type: "iphone 15"},
+			Location:   internal.Location{Latitute: 32.05766501361105, Longitude: 34.76640727232065},
+			Timestamp:  time.Now().Unix(),
+		}}}))
+	r, err := http.NewRequest(http.MethodGet, "/announcements", bytes.NewReader(buf.Bytes()))
 	require.NoError(t, err)
 	w := httptest.NewRecorder()
 

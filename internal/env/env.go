@@ -11,8 +11,7 @@ func Load() {
 
 	err := godotenv.Load("internal/env/.env")
 	if err != nil {
-		path, _ := os.Getwd()
-		log.Fatalf("failed to load environment file with %q", path)
+		log.Fatalf("failed to load environment file with %q", err)
 	}
 }
 

@@ -50,30 +50,42 @@ func NewHandle(bqClient bq.Client) *Handle {
 
 func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 
-	var announcments map[string][]*Announcement
-	err := json.NewDecoder(r.Body).Decode(&announcments)
-	if err != nil {
-		log.Infof("failed to decode announcments request with %v", err)
-		w.WriteHeader(http.StatusBadRequest)
+	announcments, code := getAnnouncements(r)
+	if code != http.StatusOK {
+		w.WriteHeader(code)
 		return
 	}
 
-	items := toDBAnnouncements(announcments)
-	if len(items) > 0 {
-		err = h.bqClient.Insert(bq.TableAnnouncement, items)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	err := h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcments))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 }
 
-func toDBAnnouncements(announcments map[string][]*Announcement) []*AnnouncementDB {
+func getAnnouncements(r *http.Request) ([]*Announcement, int) {
+
+	var announcments map[string][]*Announcement
+	err := json.NewDecoder(r.Body).Decode(&announcments)
+	if err != nil {
+		log.Infof("failed to decode announcments request with %v", err)
+		return nil, http.StatusBadRequest
+	}
+
+	res, ok := announcments["announcement"]
+	if !ok {
+		return nil, http.StatusBadRequest
+	}
+
+	return res, http.StatusOK
+}
+
+func toDBAnnouncements(announcments []*Announcement) []*AnnouncementDB {
 
 	res := []*AnnouncementDB{}
-	for _, currAnnouncement := range announcments["announcments"] {
+	for _, currAnnouncement := range announcments {
 		res = append(res, toDBAnnouncement(currAnnouncement))
 	}
 
