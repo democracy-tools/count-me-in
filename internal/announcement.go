@@ -59,11 +59,12 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items := toDBAnnouncements(announcments)
-	log.Infof("number of items %q", len(items))
-	err = h.bqClient.Insert(bq.TableAnnouncement, items)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if len(items) > 0 {
+		err = h.bqClient.Insert(bq.TableAnnouncement, items)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -71,7 +72,7 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 
 func toDBAnnouncements(announcments map[string][]*Announcement) []*AnnouncementDB {
 
-	var res []*AnnouncementDB
+	res := []*AnnouncementDB{}
 	for _, currAnnouncement := range announcments["announcments"] {
 		res = append(res, toDBAnnouncement(currAnnouncement))
 	}
