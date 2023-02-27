@@ -17,7 +17,7 @@ type AnnouncementDB struct {
 	UserDeviceType    string  `bigquery:"user_device_type"`
 	SeenDeviceId      string  `bigquery:"seen_device_id"`
 	SeenDeviceType    string  `bigquery:"seen_device_type"`
-	LocationLatitute  float64 `bigquery:"location_latitute"`
+	LocationLatitude  float64 `bigquery:"location_latitute"`
 	LocationLongitude float64 `bigquery:"location_longitude"`
 	UserTimestamp     int64   `bigquery:"user_timestamp"`
 	ServerTimestamp   int64   `bigquery:"server_timestamp"`
@@ -50,13 +50,19 @@ func NewHandle(bqClient bq.Client) *Handle {
 
 func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 
-	announcments, code := getAnnouncements(r)
+	announcements, code := getAnnouncements(r)
 	if code != http.StatusOK {
 		w.WriteHeader(code)
 		return
 	}
 
-	err := h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcments))
+	ok := validateAnnouncements(announcements)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := h.bqClient.Insert(bq.TableAnnouncement, toDBAnnouncements(announcements))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -65,16 +71,49 @@ func (h *Handle) Announcements(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func validateAnnouncements(announcements []*Announcement) bool {
+
+	for _, currAnnouncement := range announcements {
+		if !validateAnnouncement(currAnnouncement) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func validateAnnouncement(announcement *Announcement) bool {
+
+	count := len(announcement.UserId)
+	if count < 1 || count > 48 {
+		return false
+	}
+	count = len(announcement.UserDevice.Id)
+	if count > 48 {
+		return false
+	}
+	count = len(announcement.UserDevice.Type)
+	if count > 48 {
+		return false
+	}
+	count = len(announcement.SeenDevice.Id)
+	if count > 48 {
+		return false
+	}
+	count = len(announcement.SeenDevice.Type)
+	return count <= 48
+}
+
 func getAnnouncements(r *http.Request) ([]*Announcement, int) {
 
-	var announcments map[string][]*Announcement
-	err := json.NewDecoder(r.Body).Decode(&announcments)
+	var announcements map[string][]*Announcement
+	err := json.NewDecoder(r.Body).Decode(&announcements)
 	if err != nil {
-		log.Infof("failed to decode announcments request with %v", err)
+		log.Infof("failed to decode announcements request with %v", err)
 		return nil, http.StatusBadRequest
 	}
 
-	res, ok := announcments["announcements"]
+	res, ok := announcements["announcements"]
 	if !ok {
 		log.Info("no 'announcements' key found in request")
 		return nil, http.StatusBadRequest
@@ -83,10 +122,10 @@ func getAnnouncements(r *http.Request) ([]*Announcement, int) {
 	return res, http.StatusOK
 }
 
-func toDBAnnouncements(announcments []*Announcement) []*AnnouncementDB {
+func toDBAnnouncements(announcements []*Announcement) []*AnnouncementDB {
 
 	res := []*AnnouncementDB{}
-	for _, currAnnouncement := range announcments {
+	for _, currAnnouncement := range announcements {
 		res = append(res, toDBAnnouncement(currAnnouncement))
 	}
 
@@ -102,7 +141,7 @@ func toDBAnnouncement(announcement *Announcement) *AnnouncementDB {
 		UserDeviceType:    announcement.UserDevice.Type,
 		SeenDeviceId:      announcement.SeenDevice.Id,
 		SeenDeviceType:    announcement.SeenDevice.Type,
-		LocationLatitute:  announcement.Location.Latitute,
+		LocationLatitude:  announcement.Location.Latitute,
 		LocationLongitude: announcement.Location.Longitude,
 		UserTimestamp:     announcement.Timestamp,
 		ServerTimestamp:   time.Now().Unix(),
