@@ -74,8 +74,9 @@ func getAnnouncements(r *http.Request) ([]*Announcement, int) {
 		return nil, http.StatusBadRequest
 	}
 
-	res, ok := announcments["announcement"]
+	res, ok := announcments["announcements"]
 	if !ok {
+		log.Info("no 'announcements' key found in request")
 		return nil, http.StatusBadRequest
 	}
 
