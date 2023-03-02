@@ -32,7 +32,7 @@ type Announcement struct {
 }
 
 type Location struct {
-	Latitute  float64 `json:"latitute"`
+	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
 
@@ -141,7 +141,7 @@ func toDBAnnouncement(announcement *Announcement) *AnnouncementDB {
 		UserDeviceType:    announcement.UserDevice.Type,
 		SeenDeviceId:      announcement.SeenDevice.Id,
 		SeenDeviceType:    announcement.SeenDevice.Type,
-		LocationLatitute:  announcement.Location.Latitute,
+		LocationLatitute:  announcement.Location.Latitude,
 		LocationLongitude: announcement.Location.Longitude,
 		UserTimestamp:     announcement.Timestamp,
 		ServerTimestamp:   time.Now().Unix(),
