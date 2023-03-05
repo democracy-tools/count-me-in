@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAnnouncement(t *testing.T) {
+func TestHandle_Announcement(t *testing.T) {
 
 	var buf bytes.Buffer
 	require.NoError(t, json.NewEncoder(&buf).Encode(map[string][]*internal.Announcement{
