@@ -2,6 +2,7 @@ package bq
 
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/democracy-tools/countmein/internal/env"
@@ -18,6 +19,7 @@ const (
 
 type Client interface {
 	Insert(tableId string, src interface{}) error
+	GetAnnouncementCount(from int64) (int64, error)
 }
 
 type ClientWrapper struct {
@@ -82,4 +84,33 @@ func (c *ClientWrapper) Insert(tableId string, src interface{}) error {
 	}
 
 	return nil
+}
+
+func (c *ClientWrapper) GetAnnouncementCount(from int64) (int64, error) {
+
+	query := c.bqClient.Query(`SELECT count(*) FROM ` + getTableFullName(c.dataset, TableAnnouncement) + ` WHERE user_time > @time`)
+	query.Parameters = []bigquery.QueryParameter{{
+		Name:  "time",
+		Value: from,
+	}}
+
+	iterator, err := query.Read(context.Background())
+	if err != nil {
+		log.Errorf("failed to execute get announcement count query from time '%d' with '%v'", from, err)
+		return -1, err
+	}
+
+	var res int64
+	err = iterator.Next(&res)
+	if err != nil {
+		log.Errorf("failed to get announcement count from time '%d' with '%v'", from, err)
+		return -1, err
+	}
+
+	return res, nil
+}
+
+func getTableFullName(dataset string, table string) string {
+
+	return fmt.Sprintf("democracy-tools.%s.%s", dataset, table)
 }

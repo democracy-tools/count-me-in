@@ -17,10 +17,10 @@ type AnnouncementDB struct {
 	UserDeviceType    string  `bigquery:"user_device_type"`
 	SeenDeviceId      string  `bigquery:"seen_device_id"`
 	SeenDeviceType    string  `bigquery:"seen_device_type"`
-	LocationLatitute  float64 `bigquery:"location_latitute"`
+	LocationLatitude  float64 `bigquery:"location_latitude"`
 	LocationLongitude float64 `bigquery:"location_longitude"`
-	UserTimestamp     int64   `bigquery:"user_timestamp"`
-	ServerTimestamp   int64   `bigquery:"server_timestamp"`
+	UserTime          int64   `bigquery:"user_time"`
+	ServerTime        int64   `bigquery:"server_time"`
 }
 
 type Announcement struct {
@@ -28,11 +28,11 @@ type Announcement struct {
 	UserDevice Device   `json:"device_id"`
 	SeenDevice Device   `json:"seen_device"`
 	Location   Location `json:"location"`
-	Timestamp  int64    `json:"timestamp"`
+	Time       int64    `json:"time"`
 }
 
 type Location struct {
-	Latitute  float64 `json:"latitute"`
+	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
 
@@ -141,9 +141,9 @@ func toDBAnnouncement(announcement *Announcement) *AnnouncementDB {
 		UserDeviceType:    announcement.UserDevice.Type,
 		SeenDeviceId:      announcement.SeenDevice.Id,
 		SeenDeviceType:    announcement.SeenDevice.Type,
-		LocationLatitute:  announcement.Location.Latitute,
+		LocationLatitude:  announcement.Location.Latitude,
 		LocationLongitude: announcement.Location.Longitude,
-		UserTimestamp:     announcement.Timestamp,
-		ServerTimestamp:   time.Now().Unix(),
+		UserTime:          announcement.Time,
+		ServerTime:        time.Now().Unix(),
 	}
 }
