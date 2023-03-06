@@ -84,24 +84,42 @@ func validateAnnouncements(announcements []*Announcement) bool {
 
 func validateAnnouncement(announcement *Announcement) bool {
 
+	if announcement.Time < 1678133631 {
+		log.Debugf("invalid announcement time '%d' user '%s' user device '%s'",
+			announcement.Time, announcement.UserId, announcement.UserDevice.Id)
+		return false
+	}
 	count := len(announcement.UserId)
 	if count < 1 || count > 48 {
+		log.Debugf("invalid announcement user '%s' user '%s' user device '%s'", announcement.UserId)
 		return false
 	}
 	count = len(announcement.UserDevice.Id)
 	if count > 48 {
+		log.Debugf("invalid announcement user device '%s' user '%s'",
+			announcement.UserDevice.Id, announcement.UserId)
 		return false
 	}
 	count = len(announcement.UserDevice.Type)
 	if count > 48 {
+		log.Debugf("invalid announcement user device type '%s' user '%s'",
+			announcement.UserDevice.Type, announcement.UserId)
 		return false
 	}
 	count = len(announcement.SeenDevice.Id)
 	if count > 48 {
+		log.Debugf("invalid announcement seen device '%s' user '%s'",
+			announcement.SeenDevice.Id, announcement.UserId)
 		return false
 	}
 	count = len(announcement.SeenDevice.Type)
-	return count <= 48
+	if count > 48 {
+		log.Debugf("invalid announcement seen device type '%s' user '%s'",
+			announcement.SeenDevice.Type, announcement.UserId)
+		return false
+	}
+
+	return true
 }
 
 func getAnnouncements(r *http.Request) ([]*Announcement, int) {
