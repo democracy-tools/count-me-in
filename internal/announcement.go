@@ -84,7 +84,7 @@ func validateAnnouncements(announcements []*Announcement) bool {
 
 func validateAnnouncement(announcement *Announcement) bool {
 
-	if announcement.Time < 1678133631 {
+	if announcement.Time > 1678133631 && announcement.Time < time.Now().Add(time.Second).Unix() {
 		log.Debugf("invalid announcement time '%d' user '%s' user device '%s'",
 			announcement.Time, announcement.UserId, announcement.UserDevice.Id)
 		return false
