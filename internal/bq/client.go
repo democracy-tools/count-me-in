@@ -89,7 +89,7 @@ func (c *ClientWrapper) Insert(tableId string, src interface{}) error {
 
 func (c *ClientWrapper) GetAnnouncementCount(from int64) (int64, error) {
 
-	query := c.bqClient.Query(`SELECT count(*) FROM ` + getTableFullName(c.dataset, TableAnnouncement) + ` WHERE user_time > @time`)
+	query := c.bqClient.Query(`SELECT count(DISTINCT user_id) FROM ` + getTableFullName(c.dataset, TableAnnouncement) + ` WHERE user_time > @time`)
 	query.Parameters = []bigquery.QueryParameter{{
 		Name:  "time",
 		Value: from,
