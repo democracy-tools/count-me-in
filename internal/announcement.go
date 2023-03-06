@@ -91,7 +91,7 @@ func validateAnnouncement(announcement *Announcement) bool {
 	}
 	count := len(announcement.UserId)
 	if count < 1 || count > 48 {
-		log.Debugf("invalid announcement user '%s' user '%s' user device '%s'", announcement.UserId)
+		log.Debugf("invalid announcement user '%s'", announcement.UserId)
 		return false
 	}
 	count = len(announcement.UserDevice.Id)
