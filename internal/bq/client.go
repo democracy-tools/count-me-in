@@ -3,6 +3,7 @@ package bq
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/democracy-tools/countmein/internal/env"
@@ -100,14 +101,23 @@ func (c *ClientWrapper) GetAnnouncementCount(from int64) (int64, error) {
 		return -1, err
 	}
 
-	var res int64
-	err = iterator.Next(&res)
+	var values []bigquery.Value
+	err = iterator.Next(&values)
 	if err != nil {
 		log.Errorf("failed to get announcement count from time '%d' with '%v'", from, err)
 		return -1, err
 	}
+	if len(values) != 1 {
+		log.Errorf("unexpected bigquery value '%v' when getting announcement count", values)
+		return -1, err
+	}
+	count, ok := values[0].(int64)
+	if !ok {
+		log.Errorf("unexpected bigquery value of announcement count '%s'", reflect.TypeOf(values[0]).String())
+		return -1, err
+	}
 
-	return res, nil
+	return count, nil
 }
 
 func getTableFullName(dataset string, table string) string {
