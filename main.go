@@ -25,9 +25,10 @@ func main() {
 	env.Load()
 	handle := internal.NewHandle(bq.NewClientWrapper(env.GetProjectId()))
 	serve(
-		[]string{"/announcements"},
-		[]string{http.MethodPost},
-		[]func(http.ResponseWriter, *http.Request){handle.Announcements},
+		[]string{"/announcements", "/demonstrations"},
+		[]string{http.MethodPost, http.MethodGet},
+		[]func(http.ResponseWriter, *http.Request){
+			handle.Announcements, handle.Demonstrations},
 	)
 }
 

@@ -17,10 +17,10 @@ type AnnouncementDB struct {
 	UserDeviceType    string  `bigquery:"user_device_type"`
 	SeenDeviceId      string  `bigquery:"seen_device_id"`
 	SeenDeviceType    string  `bigquery:"seen_device_type"`
-	LocationLatitute  float64 `bigquery:"location_latitute"`
+	LocationLatitude  float64 `bigquery:"location_latitude"`
 	LocationLongitude float64 `bigquery:"location_longitude"`
-	UserTimestamp     int64   `bigquery:"user_timestamp"`
-	ServerTimestamp   int64   `bigquery:"server_timestamp"`
+	UserTime          int64   `bigquery:"user_time"`
+	ServerTime        int64   `bigquery:"server_time"`
 }
 
 type Announcement struct {
@@ -28,11 +28,11 @@ type Announcement struct {
 	UserDevice Device   `json:"device_id"`
 	SeenDevice Device   `json:"seen_device"`
 	Location   Location `json:"location"`
-	Timestamp  int64    `json:"timestamp"`
+	Time       int64    `json:"time"`
 }
 
 type Location struct {
-	Latitute  float64 `json:"latitute"`
+	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
 
@@ -84,24 +84,42 @@ func validateAnnouncements(announcements []*Announcement) bool {
 
 func validateAnnouncement(announcement *Announcement) bool {
 
+	if announcement.Time < 1678133631 || announcement.Time > time.Now().Add(time.Second).Unix() {
+		log.Infof("invalid announcement time '%d' user '%s' user device '%s'",
+			announcement.Time, announcement.UserId, announcement.UserDevice.Id)
+		return false
+	}
 	count := len(announcement.UserId)
 	if count < 1 || count > 48 {
+		log.Debugf("invalid announcement user '%s'", announcement.UserId)
 		return false
 	}
 	count = len(announcement.UserDevice.Id)
 	if count > 48 {
+		log.Debugf("invalid announcement user device '%s' user '%s'",
+			announcement.UserDevice.Id, announcement.UserId)
 		return false
 	}
 	count = len(announcement.UserDevice.Type)
 	if count > 48 {
+		log.Debugf("invalid announcement user device type '%s' user '%s'",
+			announcement.UserDevice.Type, announcement.UserId)
 		return false
 	}
 	count = len(announcement.SeenDevice.Id)
 	if count > 48 {
+		log.Debugf("invalid announcement seen device '%s' user '%s'",
+			announcement.SeenDevice.Id, announcement.UserId)
 		return false
 	}
 	count = len(announcement.SeenDevice.Type)
-	return count <= 48
+	if count > 48 {
+		log.Debugf("invalid announcement seen device type '%s' user '%s'",
+			announcement.SeenDevice.Type, announcement.UserId)
+		return false
+	}
+
+	return true
 }
 
 func getAnnouncements(r *http.Request) ([]*Announcement, int) {
@@ -141,9 +159,9 @@ func toDBAnnouncement(announcement *Announcement) *AnnouncementDB {
 		UserDeviceType:    announcement.UserDevice.Type,
 		SeenDeviceId:      announcement.SeenDevice.Id,
 		SeenDeviceType:    announcement.SeenDevice.Type,
-		LocationLatitute:  announcement.Location.Latitute,
+		LocationLatitude:  announcement.Location.Latitude,
 		LocationLongitude: announcement.Location.Longitude,
-		UserTimestamp:     announcement.Timestamp,
-		ServerTimestamp:   time.Now().Unix(),
+		UserTime:          announcement.Time,
+		ServerTime:        time.Now().Unix(),
 	}
 }
