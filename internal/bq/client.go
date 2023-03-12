@@ -122,5 +122,5 @@ func (c *ClientWrapper) GetAnnouncementCount(from int64) (int64, error) {
 
 func getTableFullName(dataset string, table string) string {
 
-	return fmt.Sprintf("democracy-tools.%s.%s", dataset, table)
+	return fmt.Sprintf("%s.%s.%s", env.GetProjectId(), dataset, table)
 }
