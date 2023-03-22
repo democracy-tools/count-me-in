@@ -24,7 +24,7 @@ func TestHandle_Announcement(t *testing.T) {
 			Location:   internal.Location{Latitude: 32.05766501361105, Longitude: 34.76640727232065},
 			Time:       time.Now().Unix(),
 		}}}))
-	r, err := http.NewRequest(http.MethodGet, "/announcements", bytes.NewReader(buf.Bytes()))
+	r, err := http.NewRequest(http.MethodPost, "/announcements", bytes.NewReader(buf.Bytes()))
 	require.NoError(t, err)
 	w := httptest.NewRecorder()
 
